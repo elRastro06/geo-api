@@ -23,18 +23,33 @@ app.get("/geocoding", async (req, res) => {
 });
 
 app.get("/distance", async (req, res) => {
-    const coordFrom = req.query.from;
-    const coordTo = req.query.to;
+    let coordFrom = req.query.coordFrom;
+    let coordTo = req.query.coordTo;
+    let from = req.query.from;
+    let to = req.query.to;
+
+    if(!coordFrom && !from) {
+        res.send({ error: "Bad request. Initial point not specified" }).status(400);
+        return;
+    } else if(!coordTo && !to) {
+        res.send({ error: "Bad request. Destination point not specified" }).status(400);
+        return;
+    }
+
+    let response;
 
     if(!coordFrom) {
-        res.send({ error: "Bad request. Initial point not specified" }).status(400);
-    } else if(!coordTo) {
-        res.send({ error: "Bad request. Destination point not specified" }).status(400);
+        response = await axios.get(req.protocol + "://" + req.get("host") + "/v1/geocoding?location=" + from);
+        coordFrom = response.data.lat + "," + response.data.lon;
+    }
+    if(!coordTo) {
+        response = await axios.get(req.protocol + "://" + req.get("host") + "/v1/geocoding?location=" + to);
+        coordTo = response.data.lat + "," + response.data.lon;
     }
 
     const uri = "https://router.project-osrm.org/route/v1/driving/" + coordFrom + ";" + coordTo + "?overview=false";
 
-    const response = await axios.get(uri);
+    response = await axios.get(uri);
     const data = response.data.routes[0];
 
     if(data) {
