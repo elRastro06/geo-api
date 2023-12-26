@@ -4,7 +4,7 @@ import axios from "axios";
 const app = express.Router();
 
 app.get("/geocoding", async (req, res) => {
-    const uri = "https://geocode.maps.co/search?q=";
+    const uri = `https://geocode.maps.co/search?api_key=658af9d719f53211086172jhl6ab262&q=`;
     const location = req.query.location;
 
     if (!location) {
